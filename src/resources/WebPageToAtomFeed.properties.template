@@ -1,0 +1,26 @@
+# TODO: documentation
+
+feed.0.title=pyrax
+feed.0.description=The Rackspace Python SDK
+feed.0.author=The Rackspace DRG
+feed.0.url=https://github.com/everett-toews/test/blob/master/README.md
+feed.0.url.home=http://developer.rackspace.com/
+feed.0.file=src/resources/pyrax.atom.xml
+feed.0.page.pattern=<article (.*?)</article>
+feed.0.entry.max=20
+feed.0.entry.pattern=<h3>.*?href=\"(.*?)\".*?</a>(.*?)</h3>.*?<ul>(.*?)</ul>
+feed.0.entry.title.group=2
+feed.0.entry.url.group=1
+feed.0.entry.content.group=3
+
+feed.1.title=jclouds
+feed.1.description=The Rackspace Java SDK
+feed.1.author=The Rackspace DRG
+feed.1.url=http://jclouds.incubator.apache.org/documentation/releasenotes/
+feed.1.url.home=http://developer.rackspace.com/
+feed.1.file=resources/jclouds.atom.xml
+feed.1.page.pattern=<h1>jclouds Release Notes Archive(.*?)</ul>
+feed.1.entry.max=20
+feed.1.entry.pattern=<li><a href=\"(.*?)\">(.*?)</a>.*?</li>
+feed.1.entry.title.group=2
+feed.1.entry.url.group=1

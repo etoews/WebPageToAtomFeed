@@ -1,4 +1,19 @@
+WebPageToAtomFeed.properties
+
+# Properties #
+src/resources/WebPageToAtomFeed.properties
+
+# IDE #
+.idea/
+.classpath
+.project
+*.iml
+
+# Output #
+bin/
+test-output/
 *.class
+*.atom.xml
 
 # Package Files #
 *.jar

@@ -1,0 +1,31 @@
+package com.rackspace.drg;
+
+import org.testng.annotations.Test;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
+import static org.testng.Assert.assertEquals;
+
+// TODO: check for newer version of TestNG
+// TODO: does it still need a name?
+@Test(groups = "unit")
+public class TestGetProps {
+    public void testAlternateProps() throws IOException {
+        System.setProperty("props.filename", "test/resources/WebPageToAtomFeed.properties");
+
+        WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
+        Properties props = webPageToAtomFeed.getProps();
+
+        assertEquals(props.size(), 24);
+    }
+
+    @Test(expectedExceptions = FileNotFoundException.class)
+    public void testBadProps() throws IOException {
+        System.setProperty("props.filename", "foo");
+
+        WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
+        webPageToAtomFeed.getProps();
+    }
+}
