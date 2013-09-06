@@ -1,7 +1,7 @@
 WebPageToAtomFeed.properties
 
 # Properties #
-src/resources/WebPageToAtomFeed.properties
+src/main/resources/WebPageToAtomFeed.properties
 
 # IDE #
 .idea/
