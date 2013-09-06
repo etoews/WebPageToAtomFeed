@@ -5,20 +5,37 @@ import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.Parser;
-import org.apache.commons.httpclient.*;
+import org.apache.abdera.writer.Writer;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.webpage2atomfeed.FeedProperty.*;
+import static java.lang.String.format;
 import static org.apache.commons.httpclient.cookie.CookiePolicy.IGNORE_COOKIES;
 import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER;
+import static org.webpage2atomfeed.FeedProperty.*;
 
 // TODO: dry run mode
 public class WebPageToAtomFeed {
+    private boolean dryRunMode;
 
     public static void main(String[] args) {
         WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
@@ -28,11 +45,13 @@ public class WebPageToAtomFeed {
     private void generateFeeds() {
         try {
             Properties props = getProps();
+            setDryRunMode(Boolean.valueOf((props.getProperty("dry.run.mode", "false"))));
             List<Map<FeedProperty, String>> feedProps = getFeedProps(props);
             Map<String, String> titleToWebPage = getWebPages(feedProps);
             Map<String, Feed> titleToFeed = getFeeds(feedProps, titleToWebPage);
             writeFeeds(feedProps, titleToFeed);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -54,7 +73,7 @@ public class WebPageToAtomFeed {
             Map<FeedProperty, String> tempFeedProps = new HashMap<FeedProperty, String>();
 
             for (FeedProperty feedAttribute : FeedProperty.values()) {
-                String key = "feed." + feedIndex + "." + feedAttribute;
+                String key = format("feed.%s.%s", feedIndex, feedAttribute);
                 String value = props.getProperty(key);
 
                 tempFeedProps.put(feedAttribute, value);
@@ -68,7 +87,7 @@ public class WebPageToAtomFeed {
     }
 
     private boolean hasTitle(int feedIndex, Properties props) {
-        return props.getProperty("feed." + feedIndex + "." + FEED_TITLE) != null;
+        return props.getProperty(format("feed.%s.%s", feedIndex, FEED_TITLE)) != null;
     }
 
     protected Map<String, String> getWebPages(List<Map<FeedProperty, String>> feedProps)
@@ -98,7 +117,7 @@ public class WebPageToAtomFeed {
             pageSource = new String(responseBody);
 
             if (statusCode != HttpStatus.SC_OK) {
-                String message = String.format("%s%n%s", getMethod.getStatusLine(), pageSource);
+                String message = format("%s%n%s", getMethod.getStatusLine(), pageSource);
                 throw new HttpException(message);
             }
         } finally {
@@ -111,7 +130,7 @@ public class WebPageToAtomFeed {
     /**
      * Turn web page source code into Atom feeds.
      *
-     * @param feedProps   The properties of the feeds.
+     * @param feedProps The properties of the feeds.
      * @param titleToPage A Map of feed titles to web page source code.
      * @return A Map of feed titles to Feeds
      */
@@ -157,7 +176,7 @@ public class WebPageToAtomFeed {
                 entry.setId(absoluteLink);
                 entry.addLink(absoluteLink);
 
-                if (!feedProp.get(ENTRY_CONTENT_GROUP).equals("")) {
+                if (!"".equals(feedProp.get(ENTRY_CONTENT_GROUP))) {
                     int contentGroup = Integer.valueOf(feedProp.get(ENTRY_CONTENT_GROUP));
                     String content = itemMatcher.group(contentGroup).trim();
                     entry.setSummaryAsHtml(content);
@@ -177,7 +196,7 @@ public class WebPageToAtomFeed {
             absoluteLink = feedLink + link;
         } else if (link.startsWith("/")) {
             URI feedURI = new URI(feedLink, true);
-            absoluteLink = String.format("%s://%s%s", feedURI.getScheme(), feedURI.getHost(), link);
+            absoluteLink = format("%s://%s%s", feedURI.getScheme(), feedURI.getHost(), link);
         }
 
         return absoluteLink;
@@ -192,9 +211,18 @@ public class WebPageToAtomFeed {
             File feedFile = new File(feedProp.get(FEED_FILE));
             Feed feedFromWebPage = titleToFeed.get(feedProp.get(FEED_TITLE));
 
-            if (!feedFile.exists()) {
+            if (dryRunMode) {
+                System.out.format("File: %s%n%n", feedFile.getAbsolutePath());
+
+                Writer writer = abdera.getWriterFactory().getWriter("prettyxml");
+                writer.writeTo(feedFromWebPage, System.out);
+
+                System.out.format("%n%n");
+            }
+            else if (!feedFile.exists()) {
                 feedFromWebPage.writeTo(new FileWriter(feedFile));
-            } else {
+            }
+            else {
                 Document<Feed> doc = parser.parse(new FileReader(feedFile));
                 Feed feedFromFilesystem = doc.getRoot();
 
@@ -218,5 +246,9 @@ public class WebPageToAtomFeed {
                 }
             }
         }
+    }
+
+    public void setDryRunMode(boolean dryRunMode) {
+        this.dryRunMode = dryRunMode;
     }
 }

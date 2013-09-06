@@ -1,5 +1,7 @@
 # TODO: documentation
 
+dry.run.mode=false
+
 feed.0.title=pyrax
 feed.0.description=The Rackspace Python SDK
 feed.0.author=The Rackspace DRG
@@ -24,3 +26,4 @@ feed.1.entry.max=20
 feed.1.entry.pattern=<li><a href=\"(.*?)\">(.*?)</a>.*?</li>
 feed.1.entry.title.group=2
 feed.1.entry.url.group=1
+feed.1.entry.content.group=

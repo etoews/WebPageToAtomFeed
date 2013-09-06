@@ -16,7 +16,7 @@ public class TestGetProps {
         WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
         Properties props = webPageToAtomFeed.getProps();
 
-        assertEquals(props.size(), 24);
+        assertEquals(props.size(), 25);
     }
 
     @Test(expectedExceptions = FileNotFoundException.class)

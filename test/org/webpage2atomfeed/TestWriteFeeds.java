@@ -25,4 +25,17 @@ public class TestWriteFeeds {
 
         assertTrue(atomFilename.exists());
     }
+
+    public void testWriteFeedDryRunMode() throws IOException {
+        WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
+        webPageToAtomFeed.setDryRunMode(true);
+        List<Map<FeedProperty, String>> pyraxProps = webPageToAtomFeed.getFeedProps(TestGetFeedProps.getPyraxFeedProps());
+        Map<String, String> titleToPage = TestGetFeeds.getTitleToPage(pyraxProps.get(0).get(FEED_TITLE));
+        Map<String, Feed> titleToFeed = webPageToAtomFeed.getFeeds(pyraxProps, titleToPage);
+        File atomFilename = new File(pyraxProps.get(0).get(FEED_FILE));
+
+        webPageToAtomFeed.writeFeeds(pyraxProps, titleToFeed);
+
+        assertTrue(atomFilename.exists());
+    }
 }
