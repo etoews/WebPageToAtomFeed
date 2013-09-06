@@ -1,4 +1,4 @@
-package com.rackspace.drg;
+package org.webpage2atomfeed;
 
 import org.testng.annotations.Test;
 
@@ -10,8 +10,6 @@ import java.util.Properties;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-// TODO: check for newer version of TestNG
-// TODO: does it still need a name?
 @Test(groups = "unit")
 public class TestGetFeedProps {
     public void testNoFeedProps() throws IOException {

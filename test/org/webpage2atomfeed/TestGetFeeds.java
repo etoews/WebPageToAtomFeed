@@ -1,4 +1,4 @@
-package com.rackspace.drg;
+package org.webpage2atomfeed;
 
 import org.apache.abdera.model.Feed;
 import org.testng.annotations.Test;
@@ -10,12 +10,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.rackspace.drg.FeedProperty.ENTRY_MAX;
-import static com.rackspace.drg.FeedProperty.FEED_TITLE;
+import static org.webpage2atomfeed.FeedProperty.ENTRY_MAX;
+import static org.webpage2atomfeed.FeedProperty.FEED_TITLE;
 import static org.testng.Assert.assertEquals;
 
-// TODO: check for newer version of TestNG
-// TODO: does it still need a name?
 @Test(groups = "unit")
 public class TestGetFeeds {
     public void testGetPyraxFeed() throws IOException {

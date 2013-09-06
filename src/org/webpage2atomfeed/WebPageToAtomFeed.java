@@ -1,4 +1,4 @@
-package com.rackspace.drg;
+package org.webpage2atomfeed;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Document;
@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.rackspace.drg.FeedProperty.*;
+import static org.webpage2atomfeed.FeedProperty.*;
 import static org.apache.commons.httpclient.cookie.CookiePolicy.IGNORE_COOKIES;
 import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER;
 

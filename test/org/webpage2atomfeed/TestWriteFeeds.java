@@ -1,4 +1,4 @@
-package com.rackspace.drg;
+package org.webpage2atomfeed;
 
 import org.apache.abdera.model.Feed;
 import org.testng.annotations.Test;
@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.rackspace.drg.FeedProperty.FEED_TITLE;
-import static com.rackspace.drg.FeedProperty.FEED_FILE;
+import static org.webpage2atomfeed.FeedProperty.FEED_TITLE;
+import static org.webpage2atomfeed.FeedProperty.FEED_FILE;
 import static org.testng.Assert.assertTrue;
 
 @Test(groups = "unit")

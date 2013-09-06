@@ -1,4 +1,4 @@
-package com.rackspace.drg;
+package org.webpage2atomfeed;
 
 import org.testng.annotations.Test;
 
@@ -8,8 +8,6 @@ import java.util.Properties;
 
 import static org.testng.Assert.assertEquals;
 
-// TODO: check for newer version of TestNG
-// TODO: does it still need a name?
 @Test(groups = "unit")
 public class TestGetProps {
     public void testAlternateProps() throws IOException {
