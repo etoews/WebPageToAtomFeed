@@ -48,7 +48,7 @@ public class TestGetFeeds {
     }
 
     public static Map<String, String> getTitleToPage(String title) throws IOException {
-        File pageFile = new File("test/resources/" + title + ".RELEASENOTES.html");
+        File pageFile = new File("src/test/resources/" + title + ".RELEASENOTES.html");
         String page = Files.readFile(pageFile).replaceAll("\\r\\n|\\r|\\n", " ");
 
         Map<String, String> titleToPage = Maps.newHashMap();

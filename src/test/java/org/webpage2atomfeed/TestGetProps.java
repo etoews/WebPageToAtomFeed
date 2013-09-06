@@ -11,7 +11,7 @@ import static org.testng.Assert.assertEquals;
 @Test(groups = "unit")
 public class TestGetProps {
     public void testAlternateProps() throws IOException {
-        System.setProperty("props.filename", "test/resources/WebPageToAtomFeed.properties");
+        System.setProperty("props.filename", "src/test/resources/WebPageToAtomFeed.properties");
 
         WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
         Properties props = webPageToAtomFeed.getProps();

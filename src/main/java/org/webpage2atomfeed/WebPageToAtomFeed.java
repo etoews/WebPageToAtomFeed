@@ -57,7 +57,7 @@ public class WebPageToAtomFeed {
     }
 
     protected Properties getProps() throws IOException {
-        String propsFilename = System.getProperty("props.filename", "src/resources/WebPageToAtomFeed.properties");
+        String propsFilename = System.getProperty("props.filename", "src/main/resources/WebPageToAtomFeed.properties");
 
         Properties props = new Properties();
         props.load(new FileInputStream(propsFilename));

@@ -12,6 +12,7 @@ src/resources/WebPageToAtomFeed.properties
 # Output #
 bin/
 test-output/
+target/
 *.class
 *.atom.xml
 

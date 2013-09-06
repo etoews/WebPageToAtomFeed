@@ -68,7 +68,7 @@ public class TestGetFeedProps {
         props.put("feed.0.author", "The Rackspace DRG");
         props.put("feed.0.url", "https://github.com/everett-toews/test/blob/master/README.md");
         props.put("feed.0.url.home", "http://developer.rackspace.com/");
-        props.put("feed.0.file", "test/resources/pyrax.atom.xml");
+        props.put("feed.0.file", "src/test/resources/pyrax.atom.xml");
         props.put("feed.0.page.pattern", "<article (.*?)</article>");
         props.put("feed.0.entry.max", "20");
         props.put("feed.0.entry.pattern", "<h3>.*?href=\"(.*?)\".*?</a>(.*?)</h3>(.*?)(?=<h3>)");
@@ -87,7 +87,7 @@ public class TestGetFeedProps {
         props.put("feed.1.author", "The Rackspace DRG");
         props.put("feed.1.url", "http://jclouds.incubator.apache.org/documentation/releasenotes/");
         props.put("feed.1.url.home", "http://developer.rackspace.com/");
-        props.put("feed.1.file", "test/resources/jclouds.atom.xml");
+        props.put("feed.1.file", "src/test/resources/jclouds.atom.xml");
         props.put("feed.1.page.pattern", "<h1>jclouds Release Notes Archive(.*?)</ul>");
         props.put("feed.1.entry.max", "20");
         props.put("feed.1.entry.pattern", "<li><a href=\"(.*?)\">(.*?)</a>.*?</li>");
