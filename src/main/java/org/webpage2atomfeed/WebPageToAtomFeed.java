@@ -13,6 +13,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,8 +35,8 @@ import static org.apache.commons.httpclient.cookie.CookiePolicy.IGNORE_COOKIES;
 import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER;
 import static org.webpage2atomfeed.FeedProperty.*;
 
-// TODO: dry run mode
 public class WebPageToAtomFeed {
+    private final Logger logger = LoggerFactory.getLogger(WebPageToAtomFeed.class);
     private boolean dryRunMode;
 
     public static void main(String[] args) {
@@ -46,6 +48,9 @@ public class WebPageToAtomFeed {
         try {
             Properties props = getProps();
             setDryRunMode(Boolean.valueOf((props.getProperty("dry.run.mode", "false"))));
+
+            if (!dryRunMode) logger.info("BEGIN Generating Feeds");
+
             List<Map<FeedProperty, String>> feedProps = getFeedProps(props);
             Map<String, String> titleToWebPage = getWebPages(feedProps);
             Map<String, Feed> titleToFeed = getFeeds(feedProps, titleToWebPage);
@@ -54,13 +59,19 @@ public class WebPageToAtomFeed {
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            if (!dryRunMode) logger.info("END Generating Feeds");
+        }
     }
 
     protected Properties getProps() throws IOException {
         String propsFilename = System.getProperty("props.filename", "src/main/resources/WebPageToAtomFeed.properties");
+        File propsFile = new File(propsFilename);
+
+        System.out.format("Loading property file %s%n", propsFile.getAbsolutePath());
 
         Properties props = new Properties();
-        props.load(new FileInputStream(propsFilename));
+        props.load(new FileInputStream(propsFile));
 
         return props;
     }
@@ -82,6 +93,8 @@ public class WebPageToAtomFeed {
             feedProps.add(tempFeedProps);
             feedIndex++;
         }
+
+        if (dryRunMode) System.out.format("Loaded properties for %s feeds%n", feedIndex);
 
         return feedProps;
     }
@@ -110,6 +123,8 @@ public class WebPageToAtomFeed {
 
         GetMethod getMethod = new GetMethod(url);
         getMethod.getParams().setParameter(RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
+
+        if (dryRunMode) System.out.format("Loading web page at %s%n", url);
 
         try {
             int statusCode = client.executeMethod(getMethod);
@@ -149,12 +164,16 @@ public class WebPageToAtomFeed {
             feed.addLink(feedProp.get(FEED_URL), "self");
             feed.addLink(feedProp.get(FEED_URL_HOME));
 
+            if (dryRunMode) System.out.format("Parsing feed for %s%n", feed.getTitle());
+
             String pageSource = titleToPage.get(feedProp.get(FEED_TITLE));
 
             Pattern pagePattern = Pattern.compile(feedProp.get(PAGE_PATTERN));
             Matcher pageMatcher = pagePattern.matcher(pageSource);
 
             if (pageMatcher.find()) {
+                if (dryRunMode) System.out.format("Matched page pattern %s%n", pagePattern);
+
                 pageSource = pageMatcher.group(1).trim();
             }
 
@@ -163,6 +182,8 @@ public class WebPageToAtomFeed {
             int maxEntries = Integer.valueOf(feedProp.get(ENTRY_MAX));
 
             while (itemMatcher.find() && feed.getEntries().size() < maxEntries) {
+                if (dryRunMode) System.out.format("Matched item pattern %s%n", itemPattern);
+
                 Entry entry = feed.addEntry();
                 entry.setUpdated(new Date());
 
@@ -170,16 +191,22 @@ public class WebPageToAtomFeed {
                 String title = itemMatcher.group(titleGroup).trim();
                 entry.setTitle(title);
 
+                if (dryRunMode) System.out.format("  title = %s%n", title);
+
                 int linkGroup = Integer.valueOf(feedProp.get(ENTRY_URL_GROUP));
                 String link = itemMatcher.group(linkGroup).trim();
                 String absoluteLink = getAbsoluteLink(feedProp.get(FEED_URL), link);
                 entry.setId(absoluteLink);
                 entry.addLink(absoluteLink);
 
+                if (dryRunMode) System.out.format("  link = %s%n", absoluteLink);
+
                 if (!"".equals(feedProp.get(ENTRY_CONTENT_GROUP))) {
                     int contentGroup = Integer.valueOf(feedProp.get(ENTRY_CONTENT_GROUP));
                     String content = itemMatcher.group(contentGroup).trim();
                     entry.setSummaryAsHtml(content);
+
+                    if (dryRunMode) System.out.format("  content = %s%n", content);
                 }
             }
 
@@ -221,6 +248,11 @@ public class WebPageToAtomFeed {
             }
             else if (!feedFile.exists()) {
                 feedFromWebPage.writeTo(new FileWriter(feedFile));
+
+                if (!dryRunMode) {
+                    logger.info(format("Created new Atom file %s (%s new entries)",
+                            feedFile.getAbsolutePath(), feedFromWebPage.getEntries().size()));
+                }
             }
             else {
                 Document<Feed> doc = parser.parse(new FileReader(feedFile));
@@ -230,19 +262,28 @@ public class WebPageToAtomFeed {
                 String firstEntryIdFromFilesystem = feedFromFilesystem.getEntries().get(0).getId().toString();
 
                 if (!firstEntryIdFromFilesystem.equals(firstEntryIdFromWebpage)) {
+                    int newEntryCount = 0;
+
                     for (int i = 0; i < feedFromWebPage.getEntries().size(); i++) {
                         Entry entryFromWebpage = feedFromWebPage.getEntries().get(i);
                         String entryIdFromWebpage = entryFromWebpage.getId().toString();
 
                         if (!entryIdFromWebpage.equals(firstEntryIdFromFilesystem)) {
                             feedFromFilesystem.insertEntry(Entry.class.cast(entryFromWebpage.clone()));
-                        } else {
+                            newEntryCount++;
+                        }
+                        else {
                             break;
                         }
                     }
 
                     feedFromFilesystem.setUpdated(new Date());
                     feedFromFilesystem.writeTo(new FileWriter(feedFile));
+
+                    if (!dryRunMode) {
+                        logger.info(format("Appended to Atom file %s (%s new entries)",
+                                feedFile.getAbsolutePath(), newEntryCount));
+                    }
                 }
             }
         }
