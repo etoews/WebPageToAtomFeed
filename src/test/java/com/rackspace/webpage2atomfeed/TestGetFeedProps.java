@@ -1,5 +1,7 @@
-package org.webpage2atomfeed;
+package com.rackspace.webpage2atomfeed;
 
+import com.rackspace.webpage2atomfeed.FeedProperty;
+import com.rackspace.webpage2atomfeed.WebPageToAtomFeed;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

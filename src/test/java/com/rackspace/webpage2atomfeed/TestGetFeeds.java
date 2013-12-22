@@ -1,4 +1,4 @@
-package org.webpage2atomfeed;
+package com.rackspace.webpage2atomfeed;
 
 import org.apache.abdera.model.Feed;
 import org.testng.annotations.Test;
@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.webpage2atomfeed.FeedProperty.ENTRY_MAX;
-import static org.webpage2atomfeed.FeedProperty.FEED_TITLE;
+import static com.rackspace.webpage2atomfeed.FeedProperty.ENTRY_MAX;
+import static com.rackspace.webpage2atomfeed.FeedProperty.FEED_TITLE;
 import static org.testng.Assert.assertEquals;
 
 @Test(groups = "unit")

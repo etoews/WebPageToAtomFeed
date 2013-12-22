@@ -1,4 +1,4 @@
-package org.webpage2atomfeed;
+package com.rackspace.webpage2atomfeed;
 
 public enum FeedProperty {
    FEED_TITLE("title"),
