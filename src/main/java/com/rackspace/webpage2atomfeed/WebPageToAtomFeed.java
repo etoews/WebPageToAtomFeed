@@ -98,11 +98,11 @@ public class WebPageToAtomFeed {
      * @return A List of feeds. Each feed is a Map of their feed properties to the values.
      */
     protected List<Map<FeedProperty, String>> getFeedProps(Properties props) {
-        List<Map<FeedProperty, String>> feedProps = new ArrayList<Map<FeedProperty, String>>();
+        List<Map<FeedProperty, String>> feedProps = new ArrayList<>();
         int feedIndex = 0;
 
         while (hasTitle(feedIndex, props)) {
-            Map<FeedProperty, String> tempFeedProps = new HashMap<FeedProperty, String>();
+            Map<FeedProperty, String> tempFeedProps = new HashMap<>();
 
             for (FeedProperty feedAttribute : FeedProperty.values()) {
                 String key = format("feed.%s.%s", feedIndex, feedAttribute);
@@ -132,7 +132,7 @@ public class WebPageToAtomFeed {
      */
     protected Map<String, String> getWebPages(List<Map<FeedProperty, String>> feedProps)
             throws IOException {
-        Map<String, String> titleToPage = new HashMap<String, String>(feedProps.size());
+        Map<String, String> titleToPage = new HashMap<>(feedProps.size());
 
         for (Map<FeedProperty, String> feedProp : feedProps) {
             String pageSource = getWebPageSource(feedProp.get(FeedProperty.FEED_URL));
@@ -184,7 +184,7 @@ public class WebPageToAtomFeed {
      */
     protected Map<String, Feed> getFeeds(List<Map<FeedProperty, String>> feedProps, Map<String, String> titleToPage)
             throws IOException {
-        Map<String, Feed> feeds = new HashMap<String, Feed>(feedProps.size());
+        Map<String, Feed> feeds = new HashMap<>(feedProps.size());
         Abdera abdera = new Abdera();
 
         for (Map<FeedProperty, String> feedProp : feedProps) {
