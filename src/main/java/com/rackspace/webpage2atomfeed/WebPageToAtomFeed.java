@@ -83,7 +83,7 @@ public class WebPageToAtomFeed {
         String propsFilename = System.getProperty("props.filename", "src/main/resources/WebPageToAtomFeed.properties");
         File propsFile = new File(propsFilename);
 
-        System.out.format("Loading property file %s%n", propsFile.getAbsolutePath());
+        if (dryRunMode) System.out.format("Loading property file %s%n", propsFile.getAbsolutePath());
 
         Properties props = new Properties();
         props.load(new FileInputStream(propsFile));
@@ -289,7 +289,7 @@ public class WebPageToAtomFeed {
                 feedFromWebPage.writeTo(new FileWriter(feedFile));
 
                 if (!dryRunMode) {
-                    logger.info(format("Created new Atom file %s (%s new entries)",
+                    logger.info(format("Created new Atom file %s (%d new entries)",
                             feedFile.getAbsolutePath(), feedFromWebPage.getEntries().size()));
                 }
             }
@@ -320,7 +320,7 @@ public class WebPageToAtomFeed {
                     feedFromFilesystem.writeTo(new FileWriter(feedFile));
 
                     if (!dryRunMode) {
-                        logger.info(format("Appended to Atom file %s (%s new entries)",
+                        logger.info(format("Appended to Atom file %s (%d new entries)",
                                 feedFile.getAbsolutePath(), newEntryCount));
                     }
                 }

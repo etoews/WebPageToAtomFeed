@@ -14,7 +14,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.webpage2atomfeed">
+    <logger name="com.rackspace.webpage2atomfeed">
         <level value="INFO" />
         <appender-ref ref="FILE" />
     </logger>
