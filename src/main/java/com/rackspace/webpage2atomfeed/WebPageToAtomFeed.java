@@ -36,7 +36,9 @@ import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLE
 
 /**
  * Take any web page and turn it into an Atom feed.
- *
+ * </p>
+ * All configuration is done via src/main/resources/WebPageToAtomFeed.properties
+ * </p>
  * See the <a href="https://github.com/rackerlabs/WebPageToAtomFeed">GitHub repo</a>.
  */
 public class WebPageToAtomFeed {
