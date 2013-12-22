@@ -35,6 +35,11 @@ import static org.apache.commons.httpclient.cookie.CookiePolicy.IGNORE_COOKIES;
 import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER;
 import static org.webpage2atomfeed.FeedProperty.*;
 
+/**
+ * Take any web page and turn it into an Atom feed.
+ *
+ * See the <a href="https://github.com/everett-toews/WebPageToAtomFeed">GitHub repo</a>.
+ */
 public class WebPageToAtomFeed {
     private final Logger logger = LoggerFactory.getLogger(WebPageToAtomFeed.class);
     private boolean dryRunMode;
@@ -44,6 +49,9 @@ public class WebPageToAtomFeed {
         webPageToAtomFeed.generateFeeds();
     }
 
+    /**
+     * Generate all of the feeds.
+     */
     private void generateFeeds() {
         try {
             Properties props = getProps();
@@ -64,6 +72,12 @@ public class WebPageToAtomFeed {
         }
     }
 
+    /**
+     * Load the Properties that will control the generation of the feeds. File defaults to
+     * "src/main/resources/WebPageToAtomFeed.properties" but can be overridden by setting props.filename
+     *
+     * @return Properties for all of the feeds.
+     */
     protected Properties getProps() throws IOException {
         String propsFilename = System.getProperty("props.filename", "src/main/resources/WebPageToAtomFeed.properties");
         File propsFile = new File(propsFilename);
@@ -76,6 +90,12 @@ public class WebPageToAtomFeed {
         return props;
     }
 
+    /**
+     * Get the properties for all of the feeds.
+     *
+     * @param props Properties for all the feeds.
+     * @return A List of feeds. Each feed is a Map of their feed properties to the values.
+     */
     protected List<Map<FeedProperty, String>> getFeedProps(Properties props) {
         List<Map<FeedProperty, String>> feedProps = new ArrayList<Map<FeedProperty, String>>();
         int feedIndex = 0;
@@ -103,6 +123,12 @@ public class WebPageToAtomFeed {
         return props.getProperty(format("feed.%s.%s", feedIndex, FEED_TITLE)) != null;
     }
 
+    /**
+     * Get the source code of web pages.
+     *
+     * @param feedProps A List of feeds.
+     * @return A Map of feed titles to web page source code.
+     */
     protected Map<String, String> getWebPages(List<Map<FeedProperty, String>> feedProps)
             throws IOException {
         Map<String, String> titleToPage = new HashMap<String, String>(feedProps.size());
@@ -115,6 +141,12 @@ public class WebPageToAtomFeed {
         return titleToPage;
     }
 
+    /**
+     * Get the source code of a web page.
+     *
+     * @param url URL of the web page to get.
+     * @return The web page source code (with all new lines removed).
+     */
     protected String getWebPageSource(String url) throws IOException {
         String pageSource = "";
 
@@ -145,7 +177,7 @@ public class WebPageToAtomFeed {
     /**
      * Turn web page source code into Atom feeds.
      *
-     * @param feedProps The properties of the feeds.
+     * @param feedProps A List of feeds.
      * @param titleToPage A Map of feed titles to web page source code.
      * @return A Map of feed titles to Feeds
      */
@@ -216,7 +248,7 @@ public class WebPageToAtomFeed {
         return feeds;
     }
 
-    protected String getAbsoluteLink(String feedLink, String link) throws URIException {
+    private String getAbsoluteLink(String feedLink, String link) throws URIException {
         String absoluteLink = link;
 
         if (link.startsWith("#")) {
@@ -229,6 +261,12 @@ public class WebPageToAtomFeed {
         return absoluteLink;
     }
 
+    /**
+     * Write the feeds to disk.
+     *
+     * @param feedProps A List of feeds.
+     * @param titleToFeed A Map of feed titles to web page source code.
+     */
     protected void writeFeeds(List<Map<FeedProperty, String>> feedProps, Map<String, Feed> titleToFeed)
             throws IOException {
         Abdera abdera = new Abdera();
@@ -289,6 +327,11 @@ public class WebPageToAtomFeed {
         }
     }
 
+    /**
+     * Dry run mode will cause nothing to be written to disk and all output sent to stdout.
+     *
+     * @param dryRunMode Set to true to enable dry run mode.
+     */
     public void setDryRunMode(boolean dryRunMode) {
         this.dryRunMode = dryRunMode;
     }
