@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.rackspace.webpage2atomfeed.FeedProperty.*;
 import static java.lang.String.format;
 import static org.apache.commons.httpclient.cookie.CookiePolicy.IGNORE_COOKIES;
 import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER;
@@ -104,7 +105,7 @@ public class WebPageToAtomFeed {
         while (hasTitle(feedIndex, props)) {
             Map<FeedProperty, String> tempFeedProps = new HashMap<>();
 
-            for (FeedProperty feedAttribute : FeedProperty.values()) {
+            for (FeedProperty feedAttribute : values()) {
                 String key = format("feed.%s.%s", feedIndex, feedAttribute);
                 String value = props.getProperty(key);
 
@@ -121,7 +122,7 @@ public class WebPageToAtomFeed {
     }
 
     private boolean hasTitle(int feedIndex, Properties props) {
-        return props.getProperty(format("feed.%s.%s", feedIndex, FeedProperty.FEED_TITLE)) != null;
+        return props.getProperty(format("feed.%s.%s", feedIndex, FEED_TITLE)) != null;
     }
 
     /**
@@ -135,8 +136,8 @@ public class WebPageToAtomFeed {
         Map<String, String> titleToPage = new HashMap<>(feedProps.size());
 
         for (Map<FeedProperty, String> feedProp : feedProps) {
-            String pageSource = getWebPageSource(feedProp.get(FeedProperty.FEED_URL));
-            titleToPage.put(feedProp.get(FeedProperty.FEED_TITLE), pageSource);
+            String pageSource = getWebPageSource(feedProp.get(FEED_URL));
+            titleToPage.put(feedProp.get(FEED_TITLE), pageSource);
         }
 
         return titleToPage;
@@ -189,19 +190,19 @@ public class WebPageToAtomFeed {
 
         for (Map<FeedProperty, String> feedProp : feedProps) {
             Feed feed = abdera.newFeed();
-            feed.setId(feedProp.get(FeedProperty.FEED_TITLE));
-            feed.setTitle(feedProp.get(FeedProperty.FEED_TITLE));
-            feed.setSubtitle(feedProp.get(FeedProperty.FEED_DESCRIPTION));
+            feed.setId(feedProp.get(FEED_ID));
+            feed.setTitle(feedProp.get(FEED_TITLE));
+            feed.setSubtitle(feedProp.get(FEED_DESCRIPTION));
             feed.setUpdated(new Date());
-            feed.addAuthor(feedProp.get(FeedProperty.FEED_AUTHOR));
-            feed.addLink(feedProp.get(FeedProperty.FEED_URL), "self");
-            feed.addLink(feedProp.get(FeedProperty.FEED_URL_HOME));
+            feed.addAuthor(feedProp.get(FEED_AUTHOR));
+            feed.addLink(feedProp.get(FEED_URL), "self");
+            feed.addLink(feedProp.get(FEED_URL_HOME));
 
             if (dryRunMode) System.out.format("Parsing feed for %s%n", feed.getTitle());
 
-            String pageSource = titleToPage.get(feedProp.get(FeedProperty.FEED_TITLE));
+            String pageSource = titleToPage.get(feedProp.get(FEED_TITLE));
 
-            Pattern pagePattern = Pattern.compile(feedProp.get(FeedProperty.PAGE_PATTERN));
+            Pattern pagePattern = Pattern.compile(feedProp.get(PAGE_PATTERN));
             Matcher pageMatcher = pagePattern.matcher(pageSource);
 
             if (pageMatcher.find()) {
@@ -209,41 +210,49 @@ public class WebPageToAtomFeed {
 
                 pageSource = pageMatcher.group(1).trim();
             }
+            else {
+                if (dryRunMode) System.out.format("NOT Matched page pattern %s%n", pagePattern);
+            }
 
-            Pattern itemPattern = Pattern.compile(feedProp.get(FeedProperty.ENTRY_PATTERN));
-            Matcher itemMatcher = itemPattern.matcher(pageSource);
-            int maxEntries = Integer.valueOf(feedProp.get(FeedProperty.ENTRY_MAX));
+            Pattern entryPattern = Pattern.compile(feedProp.get(ENTRY_PATTERN));
+            Matcher entryMatcher = entryPattern.matcher(pageSource);
+            int maxEntries = Integer.valueOf(feedProp.get(ENTRY_MAX));
 
-            while (itemMatcher.find() && feed.getEntries().size() < maxEntries) {
-                if (dryRunMode) System.out.format("Matched item pattern %s%n", itemPattern);
+            while (entryMatcher.find() && feed.getEntries().size() < maxEntries) {
+                if (dryRunMode) System.out.format("Matched item pattern %s%n", entryPattern);
 
                 Entry entry = feed.addEntry();
                 entry.setUpdated(new Date());
 
-                int titleGroup = Integer.valueOf(feedProp.get(FeedProperty.ENTRY_TITLE_GROUP));
-                String title = itemMatcher.group(titleGroup).trim();
+                int titleGroup = Integer.valueOf(feedProp.get(ENTRY_TITLE_GROUP));
+                String title = entryMatcher.group(titleGroup).trim();
                 entry.setTitle(title);
 
                 if (dryRunMode) System.out.format("  title = %s%n", title);
 
-                int linkGroup = Integer.valueOf(feedProp.get(FeedProperty.ENTRY_URL_GROUP));
-                String link = itemMatcher.group(linkGroup).trim();
-                String absoluteLink = getAbsoluteLink(feedProp.get(FeedProperty.FEED_URL), link);
-                entry.setId(absoluteLink);
-                entry.addLink(absoluteLink);
+                String link = feedProp.get(FEED_URL);
 
-                if (dryRunMode) System.out.format("  link = %s%n", absoluteLink);
+                if (!"".equals(feedProp.get(ENTRY_URL_GROUP))) {
+                    int linkGroup = Integer.valueOf(feedProp.get(ENTRY_URL_GROUP));
+                    link = entryMatcher.group(linkGroup).trim();
+                    link= getAbsoluteLink(feedProp.get(FEED_URL), link);
+                }
 
-                if (!"".equals(feedProp.get(FeedProperty.ENTRY_CONTENT_GROUP))) {
-                    int contentGroup = Integer.valueOf(feedProp.get(FeedProperty.ENTRY_CONTENT_GROUP));
-                    String content = itemMatcher.group(contentGroup).trim();
+                entry.setId(link);
+                entry.addLink(link);
+
+                if (dryRunMode) System.out.format("  link = %s%n", link);
+
+                if (!"".equals(feedProp.get(ENTRY_CONTENT_GROUP))) {
+                    int contentGroup = Integer.valueOf(feedProp.get(ENTRY_CONTENT_GROUP));
+                    String content = entryMatcher.group(contentGroup).trim();
                     entry.setSummaryAsHtml(content);
 
                     if (dryRunMode) System.out.format("  content = %s%n", content);
                 }
             }
 
-            feeds.put(feedProp.get(FeedProperty.FEED_TITLE), feed);
+            feeds.put(feedProp.get(FEED_TITLE), feed);
         }
 
         return feeds;
@@ -274,8 +283,8 @@ public class WebPageToAtomFeed {
         Parser parser = abdera.getParser();
 
         for (Map<FeedProperty, String> feedProp : feedProps) {
-            File feedFile = new File(feedProp.get(FeedProperty.FEED_FILE));
-            Feed feedFromWebPage = titleToFeed.get(feedProp.get(FeedProperty.FEED_TITLE));
+            File feedFile = new File(feedProp.get(FEED_FILE));
+            Feed feedFromWebPage = titleToFeed.get(feedProp.get(FEED_TITLE));
 
             if (dryRunMode) {
                 System.out.format("File: %s%n%n", feedFile.getAbsolutePath());

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.rackspace.webpage2atomfeed.FeedProperty.ENTRY_MAX;
+import static com.rackspace.webpage2atomfeed.FeedProperty.FEED_AUTHOR;
+import static com.rackspace.webpage2atomfeed.FeedProperty.FEED_TITLE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -24,10 +27,10 @@ public class TestGetFeedProps {
         List<Map<FeedProperty, String>> feedProps = webPageToAtomFeed.getFeedProps(getPyraxFeedProps());
 
         assertEquals(feedProps.size(), 1);
-        assertEquals(feedProps.get(0).size(), 12);
-        assertEquals(feedProps.get(0).get(FeedProperty.FEED_TITLE), "pyrax");
-        assertEquals(feedProps.get(0).get(FeedProperty.FEED_AUTHOR), "The Rackspace DRG");
-        assertEquals(feedProps.get(0).get(FeedProperty.ENTRY_MAX), "20");
+        assertEquals(feedProps.get(0).size(), 13);
+        assertEquals(feedProps.get(0).get(FEED_TITLE), "pyrax");
+        assertEquals(feedProps.get(0).get(FEED_AUTHOR), "The Rackspace DRG");
+        assertEquals(feedProps.get(0).get(ENTRY_MAX), "20");
     }
 
     public void testTwoFeedProps() throws IOException {
@@ -35,10 +38,10 @@ public class TestGetFeedProps {
         List<Map<FeedProperty, String>> feedProps = webPageToAtomFeed.getFeedProps(getTwoFeedProps());
 
         assertEquals(feedProps.size(), 2);
-        assertEquals(feedProps.get(1).size(), 12);
-        assertEquals(feedProps.get(1).get(FeedProperty.FEED_TITLE), "jclouds");
-        assertEquals(feedProps.get(1).get(FeedProperty.FEED_AUTHOR), "The Rackspace DRG");
-        assertEquals(feedProps.get(1).get(FeedProperty.ENTRY_MAX), "20");
+        assertEquals(feedProps.get(1).size(), 13);
+        assertEquals(feedProps.get(1).get(FEED_TITLE), "jclouds");
+        assertEquals(feedProps.get(1).get(FEED_AUTHOR), "The Rackspace DRG");
+        assertEquals(feedProps.get(1).get(ENTRY_MAX), "20");
     }
 
     public void testBadFeedProps() throws IOException {
