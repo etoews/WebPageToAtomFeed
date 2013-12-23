@@ -5,28 +5,22 @@ import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.Parser;
-import org.apache.abdera.writer.Writer;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -278,7 +272,8 @@ public class WebPageToAtomFeed {
      * @param titleToFeed A Map of feed titles to web page source code.
      */
     protected void writeFeeds(List<Map<FeedProperty, String>> feedProps, Map<String, Feed> titleToFeed)
-            throws IOException {
+            throws IOException, TransformerException, ClassNotFoundException, ParserConfigurationException,
+            InstantiationException, SAXException, IllegalAccessException {
         Abdera abdera = new Abdera();
         Parser parser = abdera.getParser();
 
@@ -288,14 +283,12 @@ public class WebPageToAtomFeed {
 
             if (dryRunMode) {
                 System.out.format("File: %s%n%n", feedFile.getAbsolutePath());
-
-                Writer writer = abdera.getWriterFactory().getWriter("prettyxml");
-                writer.writeTo(feedFromWebPage, System.out);
-
-                System.out.format("%n%n");
+                System.out.format("%s%n%n", prettyPrintXML(feedFromWebPage.toString()));
             }
             else if (!feedFile.exists()) {
-                feedFromWebPage.writeTo(new FileWriter(feedFile));
+                try (FileWriter feedWriter = new FileWriter(feedFile)) {
+                    feedWriter.write(prettyPrintXML(feedFromWebPage.toString()));
+                }
 
                 if (!dryRunMode) {
                     logger.info(format("Created new Atom file %s (%d new entries)",
@@ -326,7 +319,10 @@ public class WebPageToAtomFeed {
                     }
 
                     feedFromFilesystem.setUpdated(new Date());
-                    feedFromFilesystem.writeTo(new FileWriter(feedFile));
+
+                    try (FileWriter feedWriter = new FileWriter(feedFile)) {
+                        feedWriter.write(prettyPrintXML(feedFromFilesystem.toString()));
+                    }
 
                     if (!dryRunMode) {
                         logger.info(format("Appended to Atom file %s (%d new entries)",
@@ -344,5 +340,19 @@ public class WebPageToAtomFeed {
      */
     public void setDryRunMode(boolean dryRunMode) {
         this.dryRunMode = dryRunMode;
+    }
+
+    private String prettyPrintXML(String xml) throws TransformerException, ParserConfigurationException,
+            InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, SAXException {
+        InputSource src = new InputSource(new StringReader(xml));
+        Node document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
+        DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+        DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+        LSSerializer writer = impl.createLSSerializer();
+
+        writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+        writer.getDomConfig().setParameter("xml-declaration", Boolean.FALSE);
+
+        return writer.writeToString(document);
     }
 }

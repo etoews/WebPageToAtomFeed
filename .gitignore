@@ -12,7 +12,7 @@ bin/
 test-output/
 target/
 *.class
-*.atom.xml
+*.atom
 *.log
 
 # Package Files #
