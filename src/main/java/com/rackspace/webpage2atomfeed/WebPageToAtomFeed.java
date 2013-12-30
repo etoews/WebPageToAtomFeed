@@ -351,7 +351,7 @@ public class WebPageToAtomFeed {
         LSSerializer writer = impl.createLSSerializer();
 
         writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
-        writer.getDomConfig().setParameter("xml-declaration", Boolean.FALSE);
+        writer.getDomConfig().setParameter("xml-declaration", Boolean.TRUE);
 
         return writer.writeToString(document);
     }
