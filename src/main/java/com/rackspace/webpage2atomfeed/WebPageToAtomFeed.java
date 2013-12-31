@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -37,6 +38,8 @@ import static org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLE
  * See the <a href="https://github.com/rackerlabs/WebPageToAtomFeed">GitHub repo</a>.
  */
 public class WebPageToAtomFeed {
+    private static final String VERSION = "0.1";
+
     private final Logger logger = LoggerFactory.getLogger(WebPageToAtomFeed.class);
     private boolean dryRunMode;
 
@@ -187,6 +190,7 @@ public class WebPageToAtomFeed {
             feed.setId(feedProp.get(FEED_ID));
             feed.setTitle(feedProp.get(FEED_TITLE));
             feed.setSubtitle(feedProp.get(FEED_DESCRIPTION));
+            feed.setGenerator("https://github.com/rackerlabs/WebPageToAtomFeed", VERSION, "WebPageToAtomFeed");
             feed.setUpdated(new Date());
             feed.addAuthor(feedProp.get(FEED_AUTHOR));
             feed.addLink(feedProp.get(FEED_URL), "self");
@@ -213,7 +217,7 @@ public class WebPageToAtomFeed {
             int maxEntries = Integer.valueOf(feedProp.get(ENTRY_MAX));
 
             while (entryMatcher.find() && feed.getEntries().size() < maxEntries) {
-                if (dryRunMode) System.out.format("Matched item pattern %s%n", entryPattern);
+                if (dryRunMode) System.out.format("Matched entry pattern %s%n", entryPattern);
 
                 Entry entry = feed.addEntry();
                 entry.setUpdated(new Date());
@@ -348,11 +352,18 @@ public class WebPageToAtomFeed {
         Node document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
         DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
         DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
-        LSSerializer writer = impl.createLSSerializer();
 
-        writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
-        writer.getDomConfig().setParameter("xml-declaration", Boolean.TRUE);
+        LSSerializer serializer = impl.createLSSerializer();
+        serializer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+        serializer.getDomConfig().setParameter("xml-declaration", Boolean.TRUE);
 
-        return writer.writeToString(document);
+        LSOutput output = impl.createLSOutput();
+        output.setEncoding("UTF-8");
+
+        Writer writer = new StringWriter();
+        output.setCharacterStream(writer);
+        serializer.write(document, output);
+
+        return writer.toString();
     }
 }
