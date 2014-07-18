@@ -26,7 +26,7 @@ public class TestGetFeedProps {
         WebPageToAtomFeed webPageToAtomFeed = new WebPageToAtomFeed();
         List<Map<FeedProperty, String>> feedProps = webPageToAtomFeed.getFeedProps(getPyraxFeedProps());
 
-        assertEquals(feedProps.size(), 0);
+        assertEquals(feedProps.size(), 1);
         assertEquals(feedProps.get(0).size(), 13);
         assertEquals(feedProps.get(0).get(FEED_TITLE), "pyrax");
         assertEquals(feedProps.get(0).get(FEED_AUTHOR), "The Rackspace DRG");
